@@ -1,5 +1,5 @@
 /**
- *  Autolight
+ *  Autolight2
  *
  *  Copyright 2018 Quang Pham
  *
@@ -14,11 +14,11 @@
  *
  */
 definition(
-    name: "Autolight",
-    namespace: "Autolight_q",
+    name: "Autolight2",
+    namespace: "quangpham98",
     author: "Quang Pham",
-    description: "if light is off and presence sensor is on\r\nthen turn on light",
-    category: "My Apps",
+    description: "autolight2",
+    category: "",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
     iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
@@ -48,7 +48,7 @@ preferences {
 
 def installed() {
 	log.debug "Installed with settings: ${settings}"
-subscribe(presenceSensor, "presence", motionDetectedHandler)
+subscribe(presenceSensor, "presence.present", motionDetectedHandler)
 subscribe(thelight,"switch",lightstatus)
 schedule(startTime, "startTimerCallback")
 schedule(stopTime, "stopTimerCallback")
@@ -65,7 +65,7 @@ schedule(stopTime, "stopTimerCallback")
 
 def initialize() {
 	// TODO: subscribe to attributes, devices, locations, etc.
-subscribe(presenceSensor, "presence", motionDetectedHandler)
+subscribe(presenceSensor, "presence.present", motionDetectedHandler)
 subscribe(thelight,"switch",lightstatus)
 
 }
@@ -76,7 +76,7 @@ def motionDetectedHandler(evt) {
    def state=thelight.currentSwitch
     log.debug "the current state of sensor is $evt.value"
      
-    if(evt.value=="present"&&state=="off"){
+    if(state=="off"){
      
      thelight.on()}
      }
