@@ -26,20 +26,13 @@ definition(
 
 preferences {
     section("presence sensor is decteced ") {
-        input "presenceSensor", "capability.presenceSensor", required: true
+        input "presenceSensor", "capability.motionSensor", required: true
 	}
     
      section("light") {
         input "thelight", "capability.switch", required: true
     }
-      section("Turn off at...") {
-		input name: "startTime", title: "Turn off Time?", type: "time"
-	}
-	section("And turn them off at...") {
-		input name: "stopTime", title: "End", type: "time"
-	}
-
-}
+     }
 
    
     
@@ -48,30 +41,28 @@ preferences {
 
 def installed() {
 	log.debug "Installed with settings: ${settings}"
-subscribe(presenceSensor, "presence.present", motionDetectedHandler)
+subscribe(presenceSensor, "motion.active", motionDetectedHandler)
 subscribe(thelight,"switch",lightstatus)
-schedule(startTime, "startTimerCallback")
-schedule(stopTime, "stopTimerCallback")
+
 initialize()
 }
 
 def updated() {
 	log.debug "Updated with settings: ${settings}"
-schedule(startTime, "startTimerCallback")
-schedule(stopTime, "stopTimerCallback")
+
 	unsubscribe()
 	initialize()
 }
 
 def initialize() {
 	// TODO: subscribe to attributes, devices, locations, etc.
-subscribe(presenceSensor, "presence.present", motionDetectedHandler)
+subscribe(presenceSensor, "motion.active", motionDetectedHandler)
 subscribe(thelight,"switch",lightstatus)
 
 }
 
 def motionDetectedHandler(evt) {
-    log.debug "$evt.value"
+    
   
    def state=thelight.currentSwitch
     log.debug "the current state of sensor is $evt.value"
@@ -79,8 +70,16 @@ def motionDetectedHandler(evt) {
     if(state=="off"){
      
      thelight.on()}
-     }
-            
+          def fiveMinuteDelay = 60
+	runIn(fiveMinuteDelay, turnOffSwitch)
+}
+
+
+
+     
+ def turnOffSwitch() {
+	thelight.off()
+}
         
      
        
@@ -93,15 +92,3 @@ def lightstatus(evt){
     
     return evt.value}
 
-def startTimerCallback() {
-log.debug "Turning off switches"
-def state=thelight.currentSwitch
-if(state=="on"){
-thelight.off()}
-
-}
-
-def stopTimerCallback() {
-log.debug "Turning on switches"
-thelight.on()
-}
